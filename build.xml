@@ -2,7 +2,7 @@
 <project name="elggmulti" default="release" basedir=".">
 	
 	<!-- Package vars -->
-	<property name="elggmultiversion" value="1.11beta" />
+	<property name="elggmultiversion" value="1.11" />
 	
 	<!-- Deployment settings -->
 	<property name="output_release" value="releases/" />
@@ -13,6 +13,15 @@
 	
 	<!-- Temporary directory -->
 	<property name="tmp" value="/tmp/" />
+
+	<!-- Extra properties -->
+	<property file="build.properties" />
+	<condition property="composer.file" else="composer.json">
+		<isset property="composer.file"/>
+	</condition>
+	<condition property="vendor.provider" else="elgg">
+		<isset property="vendor.provider"/>
+	</condition>
 	
 	<target name="build">
 		
@@ -55,20 +64,18 @@
 
 	<target name="build-composer">
 		
-	
-		<!-- <unzip src="${elggpackage}" dest="${tmp}elggmultibase/" overwrite="yes" /> -->
 		<mkdir dir="${tmp}/elggcomposer"/>
-		<copy todir="${tmp}/elggcomposer" file="composer.json" overwrite="true"/>
+		<copy tofile="${tmp}/elggcomposer/composer.json" file="${composer.file}" overwrite="true"/>
 		<exec dir="${tmp}/elggcomposer" executable="composer">
   			<arg line="update --no-dev"/>
 		</exec>
-		<exec dir="${tmp}/elggcomposer/vendor/elgg/elgg" executable="composer">
+		<exec dir="${tmp}/elggcomposer/vendor/${vendor.provider}/elgg" executable="composer">
   			<arg line="update --no-dev"/>
 		</exec>
 		
  		<mkdir dir="${output}docroot" />
 		<copy todir="${output}docroot/" overwrite="true">
-			<fileset dir="${tmp}/elggcomposer/vendor/elgg/elgg" />
+			<fileset dir="${tmp}/elggcomposer/vendor/${vendor.provider}/elgg" />
 		</copy>
 		
 		<copy todir="${output}" overwrite="true">
